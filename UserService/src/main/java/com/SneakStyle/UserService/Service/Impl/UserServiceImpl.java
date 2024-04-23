@@ -35,8 +35,8 @@ public class UserServiceImpl implements UserService {
         user.setStatus(true);
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
 
-        userRepository.save(user);
-        return toDto(user);
+        User createdUser = userRepository.save(user);
+        return toDto(createdUser);
     }
 
     @Override
@@ -61,7 +61,6 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new RecordNotFoundException(String.format("User Not found at id => %d", id)));
 
         existingUser.setName(userDto.getName());
-        existingUser.setEmail(existingUser.getEmail());
         existingUser.setPhone(existingUser.getPhone());
 
         User updatedUser = userRepository.save(existingUser);

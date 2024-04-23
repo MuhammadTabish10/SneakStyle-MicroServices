@@ -14,6 +14,8 @@ import javax.validation.constraints.NotBlank;
 @AllArgsConstructor
 public class AddressDto {
     private Long id;
+
+    @NotBlank(message = "Name cannot be null.")
     private String name;
 
     @NotBlank(message = "Address cannot be null.")
