@@ -45,13 +45,13 @@ public class ProductController {
         return ResponseEntity.ok().build();
     }
 
-    @PatchMapping("/product/{id}")
+    @PutMapping("/product/{id}")
     public ResponseEntity<ProductDto> updateProduct(@PathVariable Long id, @RequestBody ProductDto productDto) {
         ProductDto product = productService.update(id, productDto);
         return ResponseEntity.ok(product);
     }
 
-    @PatchMapping("/product/{id}/status")
+    @PutMapping("/product/{id}/status")
     public ResponseEntity<Void> setProductStatusToActiveById(@PathVariable Long id) {
         productService.setToActive(id);
         return ResponseEntity.ok().build();

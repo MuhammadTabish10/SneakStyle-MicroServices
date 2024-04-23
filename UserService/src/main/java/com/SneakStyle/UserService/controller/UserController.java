@@ -13,7 +13,6 @@ import java.util.List;
 @RequestMapping("/api")
 @AllArgsConstructor
 public class UserController {
-
     private final UserService userService;
     @PostMapping("/user")
     public ResponseEntity<UserDto> registerUser(@Valid @RequestBody UserDto userDto){
@@ -35,14 +34,12 @@ public class UserController {
         userService.delete(id);
         return ResponseEntity.ok().build();
     }
-
-    @PatchMapping("/user/{id}")
+    @PutMapping("/user/{id}")
     public ResponseEntity<UserDto> updateUser(@PathVariable Long id, @RequestBody UserDto userDto) {
         UserDto user = userService.update(id, userDto);
         return ResponseEntity.ok(user);
     }
-
-    @PatchMapping("/user/{id}/status")
+    @PutMapping("/user/{id}/status")
     public ResponseEntity<Void> setUserStatusToActiveById(@PathVariable Long id) {
         userService.setToActive(id);
         return ResponseEntity.ok().build();

@@ -19,8 +19,6 @@ import java.util.Set;
 @AllArgsConstructor
 public class ProductDto {
     private Long id;
-
-    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDateTime createdAt;
 
     @NotBlank(message = "Name cannot be null.")

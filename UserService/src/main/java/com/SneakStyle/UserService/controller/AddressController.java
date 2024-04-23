@@ -38,13 +38,13 @@ public class AddressController {
         return ResponseEntity.ok().build();
     }
 
-    @PatchMapping("/address/{id}")
+    @PutMapping("/address/{id}")
     public ResponseEntity<AddressDto> updateAddress(@PathVariable Long id, @RequestBody AddressDto addressDto) {
         AddressDto address = addressService.update(id, addressDto);
         return ResponseEntity.ok(address);
     }
 
-    @PatchMapping("/address/{id}/status")
+    @PutMapping("/address/{id}/status")
     public ResponseEntity<Void> setAddressStatusToActiveById(@PathVariable Long id) {
         addressService.setToActive(id);
         return ResponseEntity.ok().build();

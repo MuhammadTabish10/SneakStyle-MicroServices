@@ -40,13 +40,13 @@ public class CategoryController {
         return ResponseEntity.ok().build();
     }
 
-    @PatchMapping("/category/{id}")
+    @PutMapping("/category/{id}")
     public ResponseEntity<CategoryDto> updateCategory(@PathVariable Long id, @RequestBody CategoryDto categoryDto) {
         CategoryDto category = categoryService.update(id, categoryDto);
         return ResponseEntity.ok(category);
     }
 
-    @PatchMapping("/category/{id}/status")
+    @PutMapping("/category/{id}/status")
     public ResponseEntity<Void> setCategoryStatusToActiveById(@PathVariable Long id) {
         categoryService.setToActive(id);
         return ResponseEntity.ok().build();
