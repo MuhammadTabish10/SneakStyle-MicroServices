@@ -28,8 +28,8 @@ public class ProductServiceImpl implements ProductService {
         product.setStatus(true);
 
         Set<Category> categories = product.getCategories().stream()
-                .map(category -> categoryRepository.findByNameAndStatusIsTrue(category.getName())
-                        .orElseThrow(() -> new RecordNotFoundException(String.format("Category Not found by name => %s", category.getName()))))
+                .map(category -> categoryRepository.findById(category.getId())
+                        .orElseThrow(() -> new RecordNotFoundException(String.format("Category Not found at id => %d", category.getId()))))
                 .collect(Collectors.toSet());
 
         product.setCategories(categories);
@@ -75,7 +75,7 @@ public class ProductServiceImpl implements ProductService {
 
         Set<Category> categories = productDto.getCategories().stream()
                 .map(category -> categoryRepository.findById(category.getId())
-                        .orElseThrow(() -> new RecordNotFoundException(String.format("Category Not found by name => %s", category.getId()))))
+                        .orElseThrow(() -> new RecordNotFoundException(String.format("Category Not found at id => %d", category.getId()))))
                 .collect(Collectors.toSet());
 
         existingProduct.setCategories(categories);

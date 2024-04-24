@@ -21,15 +21,15 @@ public class AddressController {
         AddressDto address = addressService.save(addressDto);
         return ResponseEntity.ok(address);
     }
-    @GetMapping("/address/{userId}")
-    public ResponseEntity<List<AddressDto>> getAllAddressByUser(@PathVariable(name = "userId") Long userId){
+    @GetMapping("/address")
+    public ResponseEntity<List<AddressDto>> getAllAddressByUser(@RequestParam(name = "userId") Long userId){
         List<AddressDto> addresses = addressService.getAllAddressOfUser(userId);
         return ResponseEntity.ok(addresses);
     }
-    @GetMapping("/address/{id}")
-    public ResponseEntity<AddressDto> getAddressByNameAndUserId(@PathVariable Long id,
-                                               @RequestParam(name = "userName") String userName){
-        AddressDto addressDto = addressService.getUserAddressByName(id, userName);
+    @GetMapping("/address/{userId}")
+    public ResponseEntity<AddressDto> getAddressByNameAndUserId(@PathVariable(name = "userId") Long userId,
+                                               @RequestParam(name = "name") String name){
+        AddressDto addressDto = addressService.getUserAddressByName(userId, name);
         return ResponseEntity.ok(addressDto);
     }
     @DeleteMapping("/address/{id}")

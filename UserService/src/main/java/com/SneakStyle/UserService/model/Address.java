@@ -1,5 +1,6 @@
 package com.SneakStyle.UserService.model;
 
+import com.SneakStyle.UserService.dto.enums.AddressType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,7 +19,9 @@ public class Address {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name;
+    @Enumerated(EnumType.STRING)
+    private AddressType name;
+
     private String address;
     private String city;
     private String country;
