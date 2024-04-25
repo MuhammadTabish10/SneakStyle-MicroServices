@@ -1,5 +1,6 @@
 package com.SneakStyle.OrderService.model;
 
+import com.SneakStyle.OrderService.dto.ProductDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,10 +20,12 @@ public class OrderItem {
     private Long id;
     private Long productId;
     private Integer quantity;
-    private Double pricePerItem;
     private Boolean status;
 
+    @Transient
+    private ProductDto product;
+
     @ManyToOne
-    @JoinColumn(name = "order_id", nullable = false)
+    @JoinColumn(name = "order_id")
     private Order order;
 }

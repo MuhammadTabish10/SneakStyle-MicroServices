@@ -1,5 +1,6 @@
 package com.SneakStyle.OrderService.model;
 
+import com.SneakStyle.OrderService.dto.UserDto;
 import com.SneakStyle.OrderService.dto.enums.OrderStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -26,8 +27,14 @@ public class Order {
     @Enumerated(EnumType.STRING)
     private OrderStatus orderStatus;
 
+    private Double totalAmount;
     private Boolean status;
+
+    @Transient
+    private UserDto user;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private List<OrderItem> orderItems;
+
+
 }

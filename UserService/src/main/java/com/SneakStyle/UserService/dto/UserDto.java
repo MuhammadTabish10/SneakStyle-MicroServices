@@ -18,7 +18,6 @@ import java.time.LocalDateTime;
 public class UserDto {
     private Long id;
 
-    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDateTime createdAt;
 
     @NotBlank(message = "Name cannot be null.")

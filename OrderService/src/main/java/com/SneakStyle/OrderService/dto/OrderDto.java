@@ -25,8 +25,10 @@ public class OrderDto {
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate date;
 
+    private Double totalAmount;
     private OrderStatus orderStatus;
     private Boolean status;
+    private UserDto user;
 
     @NotNull(message = "Items cannot be null.")
     private List<OrderItem> orderItems;

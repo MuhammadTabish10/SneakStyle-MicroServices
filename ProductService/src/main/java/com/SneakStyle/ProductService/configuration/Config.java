@@ -1,4 +1,4 @@
-package com.SneakStyle.UserService.configuration;
+package com.SneakStyle.ProductService.configuration;
 
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.Bean;
@@ -12,9 +12,5 @@ public class Config {
     @LoadBalanced
     public RestTemplate restTemplate(){
         return new RestTemplate();
-    }
-    @Bean
-    public BCryptPasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
     }
 }

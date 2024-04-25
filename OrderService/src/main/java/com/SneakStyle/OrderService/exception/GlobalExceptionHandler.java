@@ -22,6 +22,24 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorMessage, HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler(value = HttpErrorException.class)
+    public ResponseEntity<ErrorMessage<Object>> handleHttpErrorException(HttpErrorException ex) {
+        ErrorMessage<Object> errorMessage = ErrorMessage.builder()
+                .error(ex.getMessage())
+                .time(LocalDateTime.now())
+                .build();
+        return new ResponseEntity<>(errorMessage, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(value = GeneralErrorException.class)
+    public ResponseEntity<ErrorMessage<Object>> handleGeneralErrorException(GeneralErrorException ex) {
+        ErrorMessage<Object> errorMessage = ErrorMessage.builder()
+                .error(ex.getMessage())
+                .time(LocalDateTime.now())
+                .build();
+        return new ResponseEntity<>(errorMessage, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, String>> handleMethodArgumentNotValid(MethodArgumentNotValidException ex) {
         Map<String, String> errors = new HashMap<>();
