@@ -1,6 +1,7 @@
 package com.SneakStyle.OrderService.model;
 
 import com.SneakStyle.OrderService.dto.ProductDto;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -26,6 +27,7 @@ public class OrderItem {
     private ProductDto product;
 
     @ManyToOne
+    @JsonIgnore
     @JoinColumn(name = "order_id")
     private Order order;
 }

@@ -1,6 +1,7 @@
 package com.SneakStyle.OrderService.Service;
 
 import com.SneakStyle.OrderService.dto.OrderDto;
+import com.SneakStyle.OrderService.model.Order;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -16,4 +17,5 @@ public interface OrderService {
     OrderDto update(Long id, OrderDto orderDto);
     void delete(Long id);
     void setToActive(Long id);
+    void fetchOrderDetails(Order order);
 }

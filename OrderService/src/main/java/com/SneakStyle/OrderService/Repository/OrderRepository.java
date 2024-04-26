@@ -1,5 +1,6 @@
 package com.SneakStyle.OrderService.Repository;
 
+import com.SneakStyle.OrderService.dto.enums.OrderStatus;
 import com.SneakStyle.OrderService.model.Order;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -11,7 +12,7 @@ import java.util.List;
 
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Long> {
-    List<Order> findByOrderStatusAndStatusIsTrue(String status);
+    List<Order> findByOrderStatusAndStatusIsTrue(OrderStatus status);
     List<Order> findAllByStatusOrderByIdDesc(Boolean status);
     List<Order> findByDateAndStatusIsTrue(LocalDate date);
     List<Order> findByUserIdAndStatusIsTrue(Long userId);

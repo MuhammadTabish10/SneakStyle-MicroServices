@@ -22,8 +22,7 @@ public class OrderItemDto {
     private Integer quantity;
 
     private Boolean status;
-    private ProductDto product;
 
-    @NotNull(message = "Order cannot be null.")
+    private ProductDto product;
     private Order order;
 }
