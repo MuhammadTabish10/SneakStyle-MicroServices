@@ -54,11 +54,11 @@ public class OrderController {
         orderService.delete(id);
         return ResponseEntity.ok().build();
     }
-    @PutMapping("/order/{id}")
-    public ResponseEntity<OrderDto> updateOrder(@PathVariable Long id, @RequestBody OrderDto orderDto) {
-        OrderDto order = orderService.update(id, orderDto);
-        return ResponseEntity.ok(order);
-    }
+//    @PutMapping("/order/{id}")
+//    public ResponseEntity<OrderDto> updateOrder(@PathVariable Long id, @RequestBody OrderDto orderDto) {
+//        OrderDto order = orderService.update(id, orderDto);
+//        return ResponseEntity.ok(order);
+//    }
     @PutMapping("/order/{id}/status")
     public ResponseEntity<Void> setOrderStatusToActiveById(@PathVariable Long id) {
         orderService.setToActive(id);

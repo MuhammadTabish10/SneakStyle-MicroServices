@@ -14,7 +14,7 @@ public interface OrderService {
     List<OrderDto> getAllOrdersByUser(Long userId);
     List<OrderDto> getAllOrdersBetweenDates(LocalDate startDate, LocalDate endDate);
     OrderDto getOrderById(Long id);
-    OrderDto update(Long id, OrderDto orderDto);
+//    OrderDto update(Long id, OrderDto orderDto);
     void delete(Long id);
     void setToActive(Long id);
     void fetchOrderDetails(Order order);
