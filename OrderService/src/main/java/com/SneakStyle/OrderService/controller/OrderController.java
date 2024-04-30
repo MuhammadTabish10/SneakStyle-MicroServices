@@ -2,8 +2,12 @@ package com.SneakStyle.OrderService.controller;
 
 import com.SneakStyle.OrderService.Service.OrderService;
 import com.SneakStyle.OrderService.dto.OrderDto;
+import com.SneakStyle.OrderService.dto.enums.OrderStatus;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,13 +18,19 @@ import java.util.List;
 @RestController
 @RequestMapping("/api")
 @AllArgsConstructor
+@Slf4j
 public class OrderController {
 
     private OrderService orderService;
     @PostMapping("/order")
+//    @CircuitBreaker(name = "addOrderBreaker", fallbackMethod = "addOrderFallBack")
     public ResponseEntity<OrderDto> addOrder(@Valid @RequestBody OrderDto orderDto) {
         OrderDto order = orderService.createOrder(orderDto);
         return ResponseEntity.ok(order);
+    }
+    public ResponseEntity<OrderDto> addOrderFallBack(OrderDto orderDto, Exception ex){
+        log.info("Fallback is executed because service is down: ", ex.getMessage());
+        return new ResponseEntity<>(orderDto, HttpStatus.OK);
     }
     @GetMapping("/order")
     public ResponseEntity<List<OrderDto>> getAllOrdersByOrderStatus(@RequestParam(name = "status") String status) {
@@ -45,9 +55,21 @@ public class OrderController {
         return ResponseEntity.ok(orderDtoList);
     }
     @GetMapping("/order/{id}")
-    public ResponseEntity<OrderDto> getAllOrdersByOrderStatus(@PathVariable Long id) {
+    @CircuitBreaker(name = "getOrderByIdBreaker", fallbackMethod = "getOrderByIdFallBack")
+    public ResponseEntity<OrderDto> getOrderById(@PathVariable Long id) {
         OrderDto order = orderService.getOrderById(id);
         return ResponseEntity.ok(order);
+    }
+    public ResponseEntity<OrderDto> getOrderByIdFallBack(Long id, Throwable ex){
+        log.info("Fallback is executed because service is down: ", ex.getMessage());
+        OrderDto errorOrderDto = OrderDto.builder()
+                .id(id)
+                .orderStatus(OrderStatus.ERROR)
+                .totalAmount(0.0)
+                .date(LocalDate.now())
+                .status(false)
+                .build();
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(errorOrderDto);
     }
     @DeleteMapping("/order/{id}")
     public ResponseEntity<Void> deleteOrder(@PathVariable Long id) {

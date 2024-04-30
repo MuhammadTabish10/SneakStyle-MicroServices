@@ -11,8 +11,10 @@ import com.SneakStyle.OrderService.exception.RecordNotFoundException;
 import com.SneakStyle.OrderService.model.Order;
 import com.SneakStyle.OrderService.model.OrderItem;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 
 import javax.transaction.Transactional;
@@ -25,6 +27,7 @@ import static com.SneakStyle.OrderService.dto.constants.ApiUrls.GET_USER_BY_ID;
 import static com.SneakStyle.OrderService.util.Helper.executeRestCall;
 
 @Service
+@Slf4j
 @AllArgsConstructor
 public class OrderServiceImpl implements OrderService {
 
@@ -181,25 +184,34 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public void fetchOrderDetails(Order order) {
         if (order.getUserId() != null) {
-            ResponseEntity<UserDto> user = executeRestCall(() -> restTemplate.getForEntity(
-                    GET_USER_BY_ID + order.getUserId(), UserDto.class
-            ));
-            order.setUser(user.getBody());
+            try {
+                ResponseEntity<UserDto> user = executeRestCall(() -> restTemplate.getForEntity(
+                        GET_USER_BY_ID + order.getUserId(), UserDto.class
+                ));
+                order.setUser(user.getBody());
+            } catch (RestClientResponseException e) {
+                log.warn("User not found for order ID: {}", order.getId());
+            }
 
             for (OrderItem orderItem : order.getOrderItems()) {
                 if (orderItem.getProductId() != null) {
-                    ResponseEntity<ProductDto> product = executeRestCall(() -> restTemplate.getForEntity(
-                            GET_PRODUCT_BY_ID + orderItem.getProductId(), ProductDto.class
-                    ));
-                    orderItem.setProduct(product.getBody());
+                    try {
+                        ResponseEntity<ProductDto> product = executeRestCall(() -> restTemplate.getForEntity(
+                                GET_PRODUCT_BY_ID + orderItem.getProductId(), ProductDto.class
+                        ));
+                        orderItem.setProduct(product.getBody());
+                    } catch (RestClientResponseException e) {
+                        log.warn("Product not found for order item ID: {}", orderItem.getId());
+                    }
                 } else {
-                    throw new RecordNotFoundException("Product not found");
+                    log.warn("Product ID is null for order item: {}", orderItem.getId());
                 }
             }
         } else {
-            throw new RecordNotFoundException("User not found");
+            log.warn("User ID is null for order: {}", order.getId());
         }
     }
+
 
     public OrderDto toDto(Order order){
         return OrderDto.builder()
