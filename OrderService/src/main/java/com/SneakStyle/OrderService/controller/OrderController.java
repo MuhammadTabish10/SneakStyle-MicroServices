@@ -4,6 +4,7 @@ import com.SneakStyle.OrderService.Service.OrderService;
 import com.SneakStyle.OrderService.dto.OrderDto;
 import com.SneakStyle.OrderService.dto.enums.OrderStatus;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -23,8 +24,11 @@ import java.util.List;
 public class OrderController {
 
     private OrderService orderService;
+    static Integer retry = 1;
+
     @PostMapping("/order")
     @CircuitBreaker(name = "addOrderBreaker", fallbackMethod = "addOrderFallBack")
+//    @Retry(name = "addOrderService", fallbackMethod = "addOrderFallBack")
     public ResponseEntity<OrderDto> addOrder(@Valid @RequestBody OrderDto orderDto) {
         OrderDto order = orderService.createOrder(orderDto);
         return ResponseEntity.ok(order);
@@ -41,6 +45,7 @@ public class OrderController {
     }
     @GetMapping("/order")
     @CircuitBreaker(name = "getAllOrdersByOrderStatusBreaker", fallbackMethod = "getAllOrdersByOrderStatusFallBack")
+//    @Retry(name = "getAllOrdersByOrderStatusService", fallbackMethod = "getAllOrdersByOrderStatusFallBack")
     public ResponseEntity<List<OrderDto>> getAllOrdersByOrderStatus(@RequestParam(name = "status") String status) {
         List<OrderDto> orderDtoList = orderService.getAllByOrderStatus(status);
         return ResponseEntity.ok(orderDtoList);
@@ -60,6 +65,7 @@ public class OrderController {
 
     @GetMapping("/order/status/{status}")
     @CircuitBreaker(name = "getAllOrdersBreaker", fallbackMethod = "getAllOrdersFallBack")
+//    @Retry(name = "getAllOrdersService", fallbackMethod = "getAllOrdersFallBack")
     public ResponseEntity<List<OrderDto>> getAllOrders(@PathVariable Boolean status) {
         List<OrderDto> orderDtoList = orderService.getAllOrders(status);
         return ResponseEntity.ok(orderDtoList);
@@ -79,6 +85,7 @@ public class OrderController {
 
     @GetMapping("/order/date/{date}")
     @CircuitBreaker(name = "getAllOrdersByDateBreaker", fallbackMethod = "getAllOrdersByDateFallBack")
+//    @Retry(name = "getAllOrdersByDateService", fallbackMethod = "getAllOrdersByDateFallBack")
     public ResponseEntity<List<OrderDto>> getAllOrdersByDate(@PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
         List<OrderDto> orderDtoList = orderService.getAllOrdersByDate(date);
         return ResponseEntity.ok(orderDtoList);
@@ -97,6 +104,7 @@ public class OrderController {
     }
     @GetMapping("/order/dates")
     @CircuitBreaker(name = "getAllOrdersBetweenDatesBreaker", fallbackMethod = "getAllOrdersBetweenDatesFallBack")
+//    @Retry(name = "getAllOrdersBetweenDatesService", fallbackMethod = "getAllOrdersBetweenDatesFallBack")
     public ResponseEntity<List<OrderDto>> getAllOrdersBetweenDates(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
@@ -117,7 +125,10 @@ public class OrderController {
     }
     @GetMapping("/order/{id}")
     @CircuitBreaker(name = "getOrderByIdBreaker", fallbackMethod = "getOrderByIdFallBack")
+//    @Retry(name = "getOrderByIdService", fallbackMethod = "getOrderByIdFallBack")
+//    @RateLimiter(name = "getOrderByIdRateLimiter", fallbackMethod = "getOrderByIdFallBack")
     public ResponseEntity<OrderDto> getOrderById(@PathVariable Long id) {
+        log.info("retry: " + retry++);
         OrderDto order = orderService.getOrderById(id);
         return ResponseEntity.ok(order);
     }
