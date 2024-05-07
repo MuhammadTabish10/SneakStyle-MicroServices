@@ -4,6 +4,7 @@ import com.SneakStyle.ProductService.Service.ProductService;
 import com.SneakStyle.ProductService.dto.ProductDto;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -33,6 +34,7 @@ public class ProductController {
         return ResponseEntity.ok(productDtoList);
     }
 
+//    @PreAuthorize("hasAuthority('SCOPE_Internal')")
     @GetMapping("/product/{id}")
     public ResponseEntity<ProductDto> getProductById(@PathVariable Long id) {
         ProductDto productDto = productService.getProductById(id);

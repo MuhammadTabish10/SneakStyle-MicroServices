@@ -72,6 +72,7 @@ public class OrderController {
     }
     public ResponseEntity<List<OrderDto>> getAllOrdersFallBack(Boolean status, Exception ex){
         log.info("Fallback is executed because service is down: ", ex.getMessage());
+        ex.printStackTrace();
         List<OrderDto> orders = new ArrayList<>();
         OrderDto errorOrderDto = OrderDto.builder()
                 .orderStatus(OrderStatus.ERROR)
