@@ -6,11 +6,12 @@ import com.SneakStyle.OrderService.Service.OrderService;
 import com.SneakStyle.OrderService.dto.OrderDto;
 import com.SneakStyle.OrderService.dto.ProductDto;
 import com.SneakStyle.OrderService.dto.UserDto;
+import com.SneakStyle.OrderService.dto.constants.Messages;
 import com.SneakStyle.OrderService.dto.enums.OrderStatus;
 import com.SneakStyle.OrderService.exception.RecordNotFoundException;
 import com.SneakStyle.OrderService.model.Order;
 import com.SneakStyle.OrderService.model.OrderItem;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -28,7 +29,7 @@ import static com.SneakStyle.OrderService.util.Helper.executeRestCall;
 
 @Service
 @Slf4j
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class OrderServiceImpl implements OrderService {
 
     private final OrderRepository orderRepository;
@@ -49,29 +50,14 @@ public class OrderServiceImpl implements OrderService {
             ));
             order.setUser(user.getBody());
         } else {
-            throw new RecordNotFoundException("User not found");
+            throw new RecordNotFoundException(Messages.USER_NOT_FOUND);
         }
 
-        double totalAmount = 0.0;
-        for (OrderItem orderItem : order.getOrderItems()) {
-            if (orderItem.getProductId() != null) {
-                ResponseEntity<ProductDto> product = executeRestCall(() -> restTemplate.getForEntity(
-                        GET_PRODUCT_BY_ID + orderItem.getProductId(), ProductDto.class
-                ));
-                orderItem.setProduct(product.getBody());
-                orderItem.setStatus(true);
-                totalAmount += orderItem.getQuantity() * orderItem.getProduct().getPrice();
-                orderItem.setOrder(order);
-                orderItemRepository.save(orderItem);
-            } else {
-                throw new RecordNotFoundException("Product not found");
-            }
-        }
+        double totalAmount = calculateTotalAmountAndSaveOrderItems(order);
         order.setTotalAmount(totalAmount);
         Order createdOrder = orderRepository.save(order);
         return toDto(createdOrder);
     }
-
 
     @Override
     public List<OrderDto> getAllByOrderStatus(String orderStatus) {
@@ -111,7 +97,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public List<OrderDto> getAllOrdersBetweenDates(LocalDate startDate, LocalDate endDate) {
-        List<Order> orders = orderRepository.findByDateBetweenAndStatusIsTrue(startDate,endDate);
+        List<Order> orders = orderRepository.findByDateBetweenAndStatusIsTrue(startDate, endDate);
         orders.forEach(this::fetchOrderDetails);
         return orders.stream()
                 .map(this::toDto)
@@ -121,55 +107,16 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public OrderDto getOrderById(Long id) {
         Order order = orderRepository.findById(id)
-                .orElseThrow(() -> new RecordNotFoundException(String.format("Order Not found at id => %d", id)));
+                .orElseThrow(() -> new RecordNotFoundException(String.format(Messages.ORDER_NOT_FOUND, id)));
         fetchOrderDetails(order);
         return toDto(order);
     }
-
-//    @Override
-//    @Transactional
-//    public OrderDto update(Long id, OrderDto orderDto) {
-//        Order existingOrder = orderRepository.findById(id)
-//                .orElseThrow(() -> new RecordNotFoundException(String.format("Order Not found at id => %d", id)));
-//        existingOrder.setOrderStatus(orderDto.getOrderStatus());
-//
-//        if (existingOrder.getUserId() != null) {
-//            ResponseEntity<UserDto> user = executeRestCall(() -> restTemplate.getForEntity(
-//                    GET_USER_BY_ID + existingOrder.getUserId(), UserDto.class
-//            ));
-//            existingOrder.setUser(user.getBody());
-//        } else {
-//            throw new RecordNotFoundException("User not found");
-//        }
-//
-//        existingOrder.getOrderItems().forEach(orderItem -> orderItem.getOrder().getId());
-//        existingOrder.getOrderItems().clear();
-//
-//        double totalAmount = 0.0;
-//        for (OrderItem orderItem : orderDto.getOrderItems()) {
-//            if (orderItem.getProductId() != null) {
-//                ResponseEntity<ProductDto> product = executeRestCall(() -> restTemplate.getForEntity(
-//                        GET_PRODUCT_BY_ID + orderItem.getProductId(), ProductDto.class
-//                ));
-//                orderItem.setProduct(product.getBody());
-//                orderItem.setStatus(true);
-//                totalAmount += orderItem.getQuantity() * orderItem.getProduct().getPrice();
-//                orderItem.setOrder(existingOrder);
-//                orderItemRepository.save(orderItem);
-//            } else {
-//                throw new RecordNotFoundException("Product not found");
-//            }
-//        }
-//        existingOrder.setTotalAmount(totalAmount);
-//        Order updatedOrder = orderRepository.save(existingOrder);
-//        return toDto(updatedOrder);
-//    }
 
     @Override
     @Transactional
     public void delete(Long id) {
         Order order = orderRepository.findById(id)
-                .orElseThrow(() -> new RecordNotFoundException(String.format("Order Not found at id => %d", id)));
+                .orElseThrow(() -> new RecordNotFoundException(String.format(Messages.ORDER_NOT_FOUND, id)));
         orderRepository.setStatusWhereId(order.getId(), false);
     }
 
@@ -177,7 +124,7 @@ public class OrderServiceImpl implements OrderService {
     @Transactional
     public void setToActive(Long id) {
         Order order = orderRepository.findById(id)
-                .orElseThrow(() -> new RecordNotFoundException(String.format("Order Not found at id => %d", id)));
+                .orElseThrow(() -> new RecordNotFoundException(String.format(Messages.ORDER_NOT_FOUND, id)));
         orderRepository.setStatusWhereId(order.getId(), true);
     }
 
@@ -190,7 +137,7 @@ public class OrderServiceImpl implements OrderService {
                 ));
                 order.setUser(user.getBody());
             } catch (RestClientResponseException e) {
-                log.warn("User not found for order ID: {}", order.getId());
+                log.warn(String.format(Messages.USER_NOT_FOUND_FOR_ORDER, order.getId()));
             }
 
             for (OrderItem orderItem : order.getOrderItems()) {
@@ -201,19 +148,37 @@ public class OrderServiceImpl implements OrderService {
                         ));
                         orderItem.setProduct(product.getBody());
                     } catch (RestClientResponseException e) {
-                        log.warn("Product not found for order item ID: {}", orderItem.getId());
+                        log.warn(String.format(Messages.PRODUCT_NOT_FOUND_FOR_ORDER_ITEM, orderItem.getId()));
                     }
                 } else {
-                    log.warn("Product ID is null for order item: {}", orderItem.getId());
+                    log.warn(String.format(Messages.PRODUCT_ID_IS_NULL_FOR_ORDER_ITEM, orderItem.getId()));
                 }
             }
         } else {
-            log.warn("User ID is null for order: {}", order.getId());
+            log.warn(String.format(Messages.USER_ID_IS_NULL_FOR_ORDER, order.getId()));
         }
     }
 
+    private double calculateTotalAmountAndSaveOrderItems(Order order) {
+        double totalAmount = 0.0;
+        for (OrderItem orderItem : order.getOrderItems()) {
+            if (orderItem.getProductId() != null) {
+                ResponseEntity<ProductDto> product = executeRestCall(() -> restTemplate.getForEntity(
+                        GET_PRODUCT_BY_ID + orderItem.getProductId(), ProductDto.class
+                ));
+                orderItem.setProduct(product.getBody());
+                orderItem.setStatus(true);
+                totalAmount += orderItem.getQuantity() * orderItem.getProduct().getPrice();
+                orderItem.setOrder(order);
+                orderItemRepository.save(orderItem);
+            } else {
+                throw new RecordNotFoundException(Messages.PRODUCT_NOT_FOUND);
+            }
+        }
+        return totalAmount;
+    }
 
-    public OrderDto toDto(Order order){
+    private OrderDto toDto(Order order) {
         return OrderDto.builder()
                 .id(order.getId())
                 .userId(order.getUserId())
@@ -226,7 +191,7 @@ public class OrderServiceImpl implements OrderService {
                 .build();
     }
 
-    public Order toEntity(OrderDto orderDto){
+    private Order toEntity(OrderDto orderDto) {
         return Order.builder()
                 .id(orderDto.getId())
                 .userId(orderDto.getUserId())

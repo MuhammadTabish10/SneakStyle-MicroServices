@@ -5,6 +5,7 @@ import com.SneakStyle.OrderService.exception.HttpErrorException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
+import com.SneakStyle.OrderService.dto.constants.Messages;
 
 import java.util.function.Supplier;
 
@@ -14,9 +15,9 @@ public class Helper {
         try {
             return supplier.get();
         } catch (HttpClientErrorException ex) {
-            throw new HttpErrorException("Failed to retrieve user details. HTTP error: " + ex.getRawStatusCode());
+            throw new HttpErrorException(String.format(Messages.FAILED_RETRIEVE_USER_DETAILS_HTTP, ex.getRawStatusCode()));
         } catch (Exception ex) {
-            throw new GeneralErrorException("Failed to retrieve user details. Error: " + ex.getMessage());
+            throw new GeneralErrorException(String.format(Messages.FAILED_RETRIEVE_USER_DETAILS_ERROR, ex.getMessage()));
         }
     }
 
